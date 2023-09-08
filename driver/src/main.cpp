@@ -9,12 +9,12 @@
 
 void NTAPI function( )
 {
-    const auto win32kbase = memory::get_system_module_base( "win32kbase.sys" );
-    if ( !win32kbase )
-    {
+	const auto win32kbase = memory::get_system_module_base( "win32kbase.sys" );
+	if ( !win32kbase )
+	{
 		print( "win32kbase not found\n" );
-        return;
-    }
+		return;
+	}
 	print( "win32kbase.sys: 0x%p\n", win32kbase );
 
 	const auto pid = util::get_pid( L"explorer.exe" );
@@ -48,7 +48,7 @@ NTSTATUS DriverEntry( PDRIVER_OBJECT driver_object, PUNICODE_STRING registry_pat
 	HANDLE thread{ };
 	if ( const auto status = PsCreateSystemThread( &thread, THREAD_ALL_ACCESS, 0, 0, 0, ( PKSTART_ROUTINE ) function, 0 ); !NT_SUCCESS( status ) )
 	{
-		print( "error: failed to create system thread (status: 0x%X\n", status );
+		print( "error: failed to create system thread (status: 0x%X)\n", status );
 		ZwClose( thread );
 		return STATUS_UNSUCCESSFUL;
 	}

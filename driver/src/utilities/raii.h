@@ -15,7 +15,7 @@ namespace raii
 		{
 			if ( const auto status = PsLookupProcessByProcessId( pid, &process ); !NT_SUCCESS( status ) )
 			{
-				print( "error: process with pid %d not found (status: 0x%X\n", pid, status );
+				print( "error: process with pid %d not found (status: 0x%X)\n", pid, status );
 				return;
 			}
 
@@ -48,12 +48,15 @@ namespace raii
 		bool initialized = false;
 	};
 
-	/* for generic memory alloc/dealloc */
+	/*
+	* for generic memory alloc/dealloc
+	* can opt to use smart pointers since they work with the included crt dependency, but could be useful for logging purposes
+	*/
 	class resource_guard
 	{
 	public:
 		resource_guard( PVOID ptr ) : ptr( ptr ) { }
-		~resource_guard( ) { print( "freeing resource!\n" ); ExFreePoolWithTag( ptr, 0 ); }
+		~resource_guard( ) { if ( ptr ) { ExFreePoolWithTag( ptr, 0 ); ptr = nullptr; } }
 
 		resource_guard( const resource_guard& ) = delete;
 		resource_guard& operator=( const resource_guard& ) = delete;
