@@ -22,8 +22,7 @@ void* util::get_system_information( SYSTEM_INFORMATION_CLASS information_class )
 HANDLE util::get_pid( const wchar_t* proc_name )
 {
     /* keep a reference to the actual region of memory that was allocated*/
-    //raii::resource_guard buffer( get_system_information( SystemProcessInformation ) );
-    std::unique_ptr<SYSTEM_PROCESS_INFORMATION> buffer( reinterpret_cast<PSYSTEM_PROCESS_INFORMATION>( get_system_information( SystemProcessInformation ) ) );
+    raii::scope_guard buffer( get_system_information( SystemProcessInformation ), true );
     if ( !buffer.get( ) )
         return 0;
 

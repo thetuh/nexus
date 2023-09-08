@@ -1,17 +1,41 @@
 #pragma once
 
-/* an raii memory manager made specifically for kernel development */
 namespace raii
 {
-	/* 
-	* @note:
-	*	all copy constructors and copy assignment operators are deleted to enforce single ownership
-	*/
-
-	class process_guard
+	class scope_guard
 	{
 	public:
-		process_guard( HANDLE pid ) : pid( pid )
+		scope_guard( PVOID ptr, bool verbose = false ) : ptr( ptr ), verbose( verbose ) { }
+		~scope_guard( ) { release( ); }
+
+		void release( )
+		{
+			if ( ptr )
+			{
+				ExFreePoolWithTag( ptr, 0 );
+
+				if ( verbose )
+					print( "freed resource" );
+
+				ptr = nullptr;
+			}
+		}
+
+		scope_guard( const scope_guard& ) = delete;
+		scope_guard& operator=( const scope_guard& ) = delete;
+
+		PVOID get( ) { return ptr; }
+
+	private:
+		PVOID ptr = nullptr;
+
+		bool verbose = false;
+	};
+
+	class safe_process
+	{
+	public:
+		safe_process( HANDLE pid, bool verbose = false ) : pid( pid ), verbose( verbose )
 		{
 			if ( const auto status = PsLookupProcessByProcessId( pid, &process ); !NT_SUCCESS( status ) )
 			{
@@ -20,55 +44,35 @@ namespace raii
 			}
 
 			KeStackAttachProcess( process, &state );
-			initialized = true;
 		}
-
-		~process_guard( )
-		{
-			detach( );
-		}
+		~safe_process( ) { detach( ); }
 
 		void detach( )
 		{
-			if ( initialized )
+			if ( process )
 			{
 				KeUnstackDetachProcess( &state );
-				initialized = false;
+
+				if ( verbose )
+					print( "detached from process id: %d\n", pid );
+
+				process = nullptr;
 			}
 		}
 
-		process_guard( const process_guard& ) = delete;
-		process_guard& operator=( const process_guard& ) = delete;
+		safe_process( const safe_process& ) = delete;
+		safe_process& operator=( const safe_process& ) = delete;
 
 	private:
+		PEPROCESS process = nullptr;
 		HANDLE pid;
-		PEPROCESS process;
 		KAPC_STATE state;
 
-		bool initialized = false;
+		bool verbose = false;
 	};
 
-	/*
-	* for generic memory alloc/dealloc
-	* can opt to use smart pointers since they work with the included crt dependency, but could be useful for logging purposes
-	*/
-	class resource_guard
+	class safe_handle
 	{
 	public:
-		resource_guard( PVOID ptr ) : ptr( ptr ) { }
-		~resource_guard( ) { if ( ptr ) { ExFreePoolWithTag( ptr, 0 ); ptr = nullptr; } }
-
-		resource_guard( const resource_guard& ) = delete;
-		resource_guard& operator=( const resource_guard& ) = delete;
-
-		PVOID get( ) { return ptr; }
-
-	private:
-		PVOID ptr;
-	};
-
-	class handle_guard
-	{
-
 	};
 }

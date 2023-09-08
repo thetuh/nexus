@@ -67,7 +67,7 @@ uintptr_t memory::get_system_module_base( char* module_name )
     if ( const auto address = detail::search_cache( module_name ); address )
         return address;
 
-    raii::resource_guard buffer( util::get_system_information( SystemModuleInformation ) );
+    raii::scope_guard buffer( util::get_system_information( SystemModuleInformation ), true );
     if ( !buffer.get( ) )
         return NULL;
 
