@@ -5,6 +5,7 @@ void* util::get_system_information( SYSTEM_INFORMATION_CLASS information_class )
     unsigned long size = 0;
     ZwQuerySystemInformation( information_class, 0, 0, &size );
 
+    /* obviously important not to use a resource guard here so the caller function can use it */
     void* info = ExAllocatePool( NonPagedPool, size );
     if ( !info )
         return nullptr;
@@ -21,10 +22,10 @@ void* util::get_system_information( SYSTEM_INFORMATION_CLASS information_class )
 HANDLE util::get_pid( const wchar_t* proc_name )
 {
     /* keep a reference to the actual region of memory that was allocated*/
-    const PVOID buffer = get_system_information( SystemProcessInformation );
+    raii::resource_guard buffer( get_system_information( SystemProcessInformation ) );
 
-    /* pointer that perform actual traversal of each process entry */
-    PSYSTEM_PROCESS_INFORMATION info = ( PSYSTEM_PROCESS_INFORMATION ) buffer;
+    /* pointer that performs actual traversal of each process entry */
+    PSYSTEM_PROCESS_INFORMATION info = ( PSYSTEM_PROCESS_INFORMATION ) buffer.get( );
 
     HANDLE pid{ };
     UNICODE_STRING name;
@@ -41,7 +42,6 @@ HANDLE util::get_pid( const wchar_t* proc_name )
         info = ( PSYSTEM_PROCESS_INFORMATION ) ( ( PUCHAR ) info + info->NextEntryOffset );
     } while ( info->NextEntryOffset );
 
-    ExFreePoolWithTag( buffer, 0 );
     return pid;
 }
 

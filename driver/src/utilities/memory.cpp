@@ -67,10 +67,11 @@ uintptr_t memory::get_system_module_base( char* module_name )
     if ( const auto address = detail::search_cache( module_name ); address )
         return address;
 
-    const PRTL_PROCESS_MODULES info = ( PRTL_PROCESS_MODULES ) util::get_system_information( SystemModuleInformation );
-    if ( !info )
+    raii::resource_guard buffer( util::get_system_information( SystemModuleInformation ) );
+    if ( !buffer.get( ) )
         return NULL;
 
+    const PRTL_PROCESS_MODULES info = ( PRTL_PROCESS_MODULES ) buffer.get( );
     for ( size_t i = 0; i < info->NumberOfModules; ++i )
     {
         const auto& mod = info->Modules[ i ];
@@ -80,13 +81,9 @@ uintptr_t memory::get_system_module_base( char* module_name )
             detail::module_cache.emplace_back( std::make_pair( lowered_name, ( uintptr_t ) mod.ImageBase ) );
 
         if ( !strcmp( lowered_name, module_name ) )
-        {
-            ExFreePoolWithTag( info, 0 );
             return ( uintptr_t ) mod.ImageBase;
-        }
     }
 
-    ExFreePoolWithTag( info, 0 );
     return NULL;
 }
 
