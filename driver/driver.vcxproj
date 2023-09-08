@@ -36,6 +36,7 @@
     <ConfigurationType>Driver</ConfigurationType>
     <DriverType>KMDF</DriverType>
     <DriverTargetPlatform>Universal</DriverTargetPlatform>
+    <ALLOW_DATE_TIME>1</ALLOW_DATE_TIME>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <TargetVersion>Windows10</TargetVersion>
@@ -45,6 +46,7 @@
     <DriverType>KMDF</DriverType>
     <DriverTargetPlatform>Universal</DriverTargetPlatform>
     <Driver_SpectreMitigation>false</Driver_SpectreMitigation>
+    <ALLOW_DATE_TIME>1</ALLOW_DATE_TIME>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'" Label="Configuration">
     <TargetVersion>Windows10</TargetVersion>
@@ -150,6 +152,7 @@
     <ClInclude Include="dependencies\crt\stlcrt.h" />
     <ClInclude Include="src\defines.h" />
     <ClInclude Include="src\includes.h" />
+    <ClInclude Include="src\utilities\crypt.h" />
     <ClInclude Include="src\utilities\memory.h" />
     <ClInclude Include="src\utilities\stl.h" />
     <ClInclude Include="src\utilities\raii.h" />

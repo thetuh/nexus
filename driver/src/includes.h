@@ -9,6 +9,7 @@
 
 #include "defines.h"
 
+#include "utilities/crypt.h"
 #include "utilities/raii.h"
 #include "utilities/stl.h"
 #include "utilities/util.h"

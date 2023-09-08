@@ -47,7 +47,7 @@ namespace raii
 				ExFreePoolWithTag( ptr, 0 );
 
 				if ( verbose )
-					print( "freed memory\n" );
+					print( crypt( "freed memory\n") );
 
 				ptr = nullptr;
 			}
@@ -71,7 +71,7 @@ namespace raii
 	public:
 		HANDLE get( ) { return handle; }
 		PHANDLE get_ref( ) { return &handle; }
-		void release( ) { if ( handle ) { ZwClose( handle ); if ( verbose ) print( "freed handle\n" ); handle = nullptr; } }
+		void release( ) { if ( handle ) { ZwClose( handle ); if ( verbose ) print( crypt("freed handle\n") ); handle = nullptr; } }
 
 	private:
 		HANDLE handle;
@@ -86,7 +86,7 @@ namespace raii
 		{
 			if ( const auto status = PsLookupProcessByProcessId( pid, &process ); !NT_SUCCESS( status ) )
 			{
-				print( "error: process with pid %d not found (status: 0x%X)\n", pid, status );
+				print( crypt( "error: process with pid %d not found (status: 0x%X)\n"), pid, status );
 				return;
 			}
 
@@ -106,7 +106,7 @@ namespace raii
 				KeUnstackDetachProcess( &state );
 
 				if ( verbose )
-					print( "detached from process id: %d\n", pid );
+					print( crypt("detached from process id: %d\n"), pid );
 
 				process = nullptr;
 			}
