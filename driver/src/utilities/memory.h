@@ -7,8 +7,6 @@ namespace memory
     {
         inline std::vector<std::pair<const char*, uintptr_t>>module_cache;
         uintptr_t search_cache( const char* target );
-
-        void* get_system_information( SYSTEM_INFORMATION_CLASS information_class );
     }
 
     std::uintptr_t get_system_module_base( char* module_name );

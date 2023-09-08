@@ -3,8 +3,7 @@
 /*
 * @todo:
 *	implement other raii classes
-*	add POC um-km communication mechanism
-*	dynamically retrieve explorer.exe pid rather than hardcode it
+*	add POC communication request handler
 */
 
 void NTAPI function( )
@@ -17,8 +16,16 @@ void NTAPI function( )
     }
 	print( "win32kbase.sys: 0x%p\n", win32kbase );
 
+	const auto pid = util::get_pid( L"explorer.exe" );
+	if ( !pid )
+	{
+		print( "explorer not found\n" );
+		return;
+	}
+	print( "explorer pid: %d\n", pid );
+
 	/* @https://www.unknowncheats.me/forum/general-programming-and-reversing/492970-reading-memory-win32kbase-sys.html */
-	raii::process_guard process( ( HANDLE ) 4068 );
+	const raii::process_guard process( pid );
 
 	const auto address = memory::sig_scan( "E8 ? ? ? ? 48 8B CB E8 ? ? ? ? 84 C0 75 15", win32kbase );
 	if ( !address )

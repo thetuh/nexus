@@ -67,7 +67,7 @@ uintptr_t memory::get_system_module_base( char* module_name )
     if ( const auto address = detail::search_cache( module_name ); address )
         return address;
 
-    const PRTL_PROCESS_MODULES info = ( PRTL_PROCESS_MODULES ) detail::get_system_information( SystemModuleInformation );
+    const PRTL_PROCESS_MODULES info = ( PRTL_PROCESS_MODULES ) util::get_system_information( SystemModuleInformation );
     if ( !info )
         return NULL;
 
@@ -103,7 +103,7 @@ uintptr_t memory::detail::search_cache( const char* target )
 
         const int result = strcmp( module_cache[ mid ].first, target );
         if ( result == 0 )
-            return module_cache[ mid ].second;  // found the target, return corresponding module address
+            return module_cache[ mid ].second;
 
         else if ( result < 0 )
             left = mid + 1;  // target is in the right half
@@ -111,25 +111,5 @@ uintptr_t memory::detail::search_cache( const char* target )
             right = mid - 1;  // target is in the left half
     }
 
-    return 0;  // not found
-}
-
-void* memory::detail::get_system_information( SYSTEM_INFORMATION_CLASS information_class )
-{
-    unsigned long size = 32;
-    char buffer[ 32 ];
-
-    ZwQuerySystemInformation( information_class, buffer, size, &size );
-
-    void* info = ExAllocatePool( NonPagedPool, size );
-    if ( !info )
-        return nullptr;
-
-    if ( !NT_SUCCESS( ZwQuerySystemInformation( information_class, info, size, &size ) ) )
-    {
-        ExFreePoolWithTag( info, 0 );
-        return nullptr;
-    }
-
-    return info;
+    return 0;
 }

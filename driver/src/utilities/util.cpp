@@ -1,5 +1,50 @@
 #include "../includes.h"
 
+void* util::get_system_information( SYSTEM_INFORMATION_CLASS information_class )
+{
+    unsigned long size = 0;
+    ZwQuerySystemInformation( information_class, 0, 0, &size );
+
+    void* info = ExAllocatePool( NonPagedPool, size );
+    if ( !info )
+        return nullptr;
+
+    if ( !NT_SUCCESS( ZwQuerySystemInformation( information_class, info, size, &size ) ) )
+    {
+        ExFreePoolWithTag( info, 0 );
+        return nullptr;
+    }
+
+    return info;
+}
+
+HANDLE util::get_pid( const wchar_t* proc_name )
+{
+    /* keep a reference to the actual region of memory that was allocated*/
+    const PVOID buffer = get_system_information( SystemProcessInformation );
+
+    /* pointer that perform actual traversal of each process entry */
+    PSYSTEM_PROCESS_INFORMATION info = ( PSYSTEM_PROCESS_INFORMATION ) buffer;
+
+    HANDLE pid{ };
+    UNICODE_STRING name;
+    RtlInitUnicodeString( &name, proc_name );
+
+    do
+    {
+        if ( RtlEqualUnicodeString( &info->ImageName, &name, TRUE ) )
+        {
+            pid = ( HANDLE ) info->UniqueProcessId;
+            break;
+        }
+
+        info = ( PSYSTEM_PROCESS_INFORMATION ) ( ( PUCHAR ) info + info->NextEntryOffset );
+    } while ( info->NextEntryOffset );
+
+    ExFreePoolWithTag( buffer, 0 );
+    return pid;
+}
+
 const char* util::crt::to_lower( char* string )
 {
     for ( char* pointer = string; *pointer != '\0'; ++pointer )
