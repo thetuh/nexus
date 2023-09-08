@@ -5,31 +5,6 @@
 /* a library made to automate resource disposal and safe cleanups following scope exit */
 namespace raii
 {
-	/* release resources in a specified order (work in progress) */
-	class resource_manager
-	{
-	public:
-		resource_manager( ) = default;
-		~resource_manager( ) = default;
-
-		// add a resource to be managed
-		template <typename T>
-		void add_resource( T&& resource )
-		{
-			resources.emplace_back( std::forward<T>( resource ) );
-		}
-
-		/* release resources in a specific order */
-		void release( )
-		{
-			for ( auto& release_func : resources )
-				release_func( );
-		}
-
-	private:
-		std::vector<std::function<void( )>> resources;
-	};
-
 	/* call back a supplied procedure upon destruction */
 	template <typename fn_callback, typename... fn_args>
 	class scope_guard
@@ -39,12 +14,12 @@ namespace raii
 		~scope_guard( ) { execute( ); }
 
 	public:
-		void execute( ) { invoke_callable( std::make_index_sequence < std::tuple_size_v<std::tuple<fn_args...>>>( ) ); active = false; }
+		void execute( ) { if ( active ) { invoke_callable( std::make_index_sequence < std::tuple_size_v<std::tuple<fn_args...>>>( ) ); active = false; } }
 		void cancel( ) { active = false; }
 
 	private:
 		template <size_t... Is>
-		void invoke_callable( std::index_sequence<Is...> ) { if ( active ) std::invoke( callback, std::get<Is>( args )... ); }
+		void invoke_callable( std::index_sequence<Is...> ) { std::invoke( callback, std::get<Is>( args )... ); }
 
 	private:
 		const fn_callback callback;
