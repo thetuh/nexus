@@ -2,8 +2,8 @@
 
 namespace util
 {
-    /* wrapper for ZwQuerySystemInformation that handles the memory allocation */
-    /* remember to dispose after use ! */
+    /* wrapper for ZwQuerySystemInformation that handles the memory alloc size for you */
+    /* remember to dispose after use */
     void* get_system_information( SYSTEM_INFORMATION_CLASS information_class );
 
     HANDLE get_pid( const wchar_t* proc_name );

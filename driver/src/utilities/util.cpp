@@ -5,7 +5,7 @@ void* util::get_system_information( SYSTEM_INFORMATION_CLASS information_class )
     unsigned long size = 0;
     ZwQuerySystemInformation( information_class, 0, 0, &size );
 
-    /* obviously important not to use a resource guard here so the caller function can use it */
+    /* obviously important not to use a scope guard here so the caller function can use it */
     void* info = ExAllocatePool( NonPagedPool, size );
     if ( !info )
         return nullptr;
@@ -22,7 +22,7 @@ void* util::get_system_information( SYSTEM_INFORMATION_CLASS information_class )
 HANDLE util::get_pid( const wchar_t* proc_name )
 {
     /* keep a reference to the actual region of memory that was allocated*/
-    raii::scope_guard buffer( get_system_information( SystemProcessInformation ), true );
+    raii::safe_memory buffer( get_system_information( SystemProcessInformation ), true );
     if ( !buffer.get( ) )
         return 0;
 
