@@ -4,6 +4,8 @@
 #include <ntddk.h>
 #include <windef.h>
 #include <ntimage.h>
+#include <tuple>
+#include <memory>
 
 #include "defines.h"
 

@@ -8,6 +8,8 @@ namespace raii
 		scope_guard( PVOID ptr, bool verbose = false ) : ptr( ptr ), verbose( verbose ) { }
 		~scope_guard( ) { release( ); }
 
+		PVOID get( ) { return ptr; }
+
 		void release( )
 		{
 			if ( ptr )
@@ -24,18 +26,16 @@ namespace raii
 		scope_guard( const scope_guard& ) = delete;
 		scope_guard& operator=( const scope_guard& ) = delete;
 
-		PVOID get( ) { return ptr; }
-
 	private:
-		PVOID ptr = nullptr;
-
-		bool verbose = false;
+		PVOID ptr;
+		const bool verbose;
 	};
 
-	class safe_process
+	/* automatically detaches upon destruction */
+	class safe_process_attach
 	{
 	public:
-		safe_process( HANDLE pid, bool verbose = false ) : pid( pid ), verbose( verbose )
+		safe_process_attach( HANDLE pid, bool verbose = false ) : pid( pid ), verbose( verbose )
 		{
 			if ( const auto status = PsLookupProcessByProcessId( pid, &process ); !NT_SUCCESS( status ) )
 			{
@@ -45,8 +45,10 @@ namespace raii
 
 			KeStackAttachProcess( process, &state );
 		}
-		~safe_process( ) { detach( ); }
 
+		~safe_process_attach( ) { detach( ); }
+
+		PEPROCESS get( ) { return process; }
 		void detach( )
 		{
 			if ( process )
@@ -60,15 +62,14 @@ namespace raii
 			}
 		}
 
-		safe_process( const safe_process& ) = delete;
-		safe_process& operator=( const safe_process& ) = delete;
+		safe_process_attach( const safe_process_attach& ) = delete;
+		safe_process_attach& operator=( const safe_process_attach& ) = delete;
 
 	private:
-		PEPROCESS process = nullptr;
-		HANDLE pid;
+		PEPROCESS process;
 		KAPC_STATE state;
-
-		bool verbose = false;
+		const HANDLE pid;
+		const bool verbose;
 	};
 
 	class safe_handle

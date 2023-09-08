@@ -25,7 +25,7 @@ void NTAPI function( )
 	print( "explorer pid: %d\n", pid );
 
 	/* @https://www.unknowncheats.me/forum/general-programming-and-reversing/492970-reading-memory-win32kbase-sys.html */
-	raii::safe_process process( pid, true );
+	raii::safe_process_attach process( pid, true );
 
 	const auto address = memory::sig_scan( "E8 ? ? ? ? 48 8B CB E8 ? ? ? ? 84 C0 75 15", win32kbase );
 	if ( !address )
