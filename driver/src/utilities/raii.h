@@ -1,15 +1,45 @@
 #pragma once
 
-/* a library made to automate resource disposal */
+#include <functional>
+
+/* a library made to automate resource disposal and safe cleanups following scope exit */
 namespace raii
 {
+	/* release resources in a specified order (work in progress) */
+	class resource_manager
+	{
+	public:
+		resource_manager( ) = default;
+		~resource_manager( ) = default;
+
+		// add a resource to be managed
+		template <typename T>
+		void add_resource( T&& resource )
+		{
+			resources.emplace_back( std::forward<T>( resource ) );
+		}
+
+		/* release resources in a specific order */
+		void release( )
+		{
+			for ( auto& release_func : resources )
+				release_func( );
+		}
+
+	private:
+		std::vector<std::function<void( )>> resources;
+	};
+
 	/* call back a supplied procedure upon destruction */
 	template <typename fn_callback, typename... fn_args>
 	class scope_guard
 	{
 	public:
 		scope_guard( const fn_callback& callback, const fn_args& ...args ) : callback{ callback }, args{ args... }, active( true ) { }
-		~scope_guard( ) { invoke_callable( std::make_index_sequence < std::tuple_size_v<std::tuple<fn_args...>>>( ) ); }
+		~scope_guard( ) { execute( ); }
+
+	public:
+		void execute( ) { invoke_callable( std::make_index_sequence < std::tuple_size_v<std::tuple<fn_args...>>>( ) ); active = false; }
 		void cancel( ) { active = false; }
 
 	private:
@@ -19,10 +49,11 @@ namespace raii
 	private:
 		const fn_callback callback;
 		const std::tuple< fn_args... > args;
-		const bool active;
+		bool active;
 	};
 
-	/* free memory upon destruction */
+	/* free memory upon object destruction */
+	/* similar to std::unique_ptr with optional logging */
 	class safe_memory
 	{
 	public:
@@ -41,7 +72,7 @@ namespace raii
 				ExFreePoolWithTag( ptr, 0 );
 
 				if ( verbose )
-					print( "freed resource\n" );
+					print( "freed memory\n" );
 
 				ptr = nullptr;
 			}
@@ -52,7 +83,27 @@ namespace raii
 		const bool verbose;
 	};
 
-	/* detach from process upon destruction */
+	/* free handle upon object destruction */
+	class safe_handle
+	{
+	public:
+		safe_handle( bool verbose = false ) : handle( nullptr ), verbose( verbose ) { }
+		~safe_handle( ) { release( ); }
+
+		safe_handle( const safe_handle& ) = delete;
+		safe_handle& operator=( const safe_handle& ) = delete;
+
+	public:
+		HANDLE get( ) { return handle; }
+		PHANDLE get_ref( ) { return &handle; }
+		void release( ) { if ( handle ) { ZwClose( handle ); if ( verbose ) print( "freed handle\n" ); handle = nullptr; } }
+
+	private:
+		HANDLE handle;
+		const bool verbose;
+	};
+
+	/* detach from process upon object destruction */
 	class safe_process
 	{
 	public:
@@ -91,10 +142,5 @@ namespace raii
 		KAPC_STATE state;
 		const HANDLE pid;
 		const bool verbose;
-	};
-
-	class safe_handle
-	{
-	public:
 	};
 }

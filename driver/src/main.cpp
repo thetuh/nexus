@@ -2,6 +2,7 @@
 
 /*
 * @todo:
+*	finish implementing raii resource manager class
 *	add POC communication request handler
 */
 
@@ -46,14 +47,12 @@ NTSTATUS DriverEntry( PDRIVER_OBJECT driver_object, PUNICODE_STRING registry_pat
 	UNREFERENCED_PARAMETER( registry_path );
 
 	/* can supply useful info from kdmapper */
-	HANDLE thread{ };
-	if ( const auto status = PsCreateSystemThread( &thread, THREAD_ALL_ACCESS, 0, 0, 0, ( PKSTART_ROUTINE ) function, 0 ); !NT_SUCCESS( status ) )
+	raii::safe_handle thread_handle( true );
+	if ( const auto status = PsCreateSystemThread( thread_handle.get_ref( ), THREAD_ALL_ACCESS, 0, 0, 0, ( PKSTART_ROUTINE ) function, 0 ); !NT_SUCCESS( status ) )
 	{
 		print( "error: failed to create system thread (status: 0x%X)\n", status );
-		ZwClose( thread );
 		return STATUS_UNSUCCESSFUL;
 	}
 
-	ZwClose( thread );
 	return STATUS_SUCCESS;
 }
