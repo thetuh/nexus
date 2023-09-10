@@ -6,10 +6,12 @@
 #include <ntimage.h>
 #include <tuple>
 #include <memory>
+#include <communication.h>
+#include <crypt.h>
 
-#include "defines.h"
+#include "structs.h"
+#include "definitions.h"
 
-#include "utilities/crypt.h"
 #include "utilities/raii.h"
 #include "utilities/stl.h"
 #include "utilities/util.h"

@@ -76,14 +76,14 @@
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
     <OutDir>$(SolutionDir)\build\bin\debug\</OutDir>
     <IntDir>$(SolutionDir)\build\intermediates\driver\debug\</IntDir>
-    <IncludePath>$(VC_IncludePath);$(ProjectDir);$(IncludePath)</IncludePath>
+    <IncludePath>E:\development\yepyep6969\nexus\shared;$(VC_IncludePath);$(ProjectDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(DDK_LibraryPath_DDKPlatform);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
     <OutDir>$(SolutionDir)\build\bin\release\</OutDir>
     <IntDir>$(SolutionDir)\build\intermediates\driver\release\</IntDir>
-    <IncludePath>$(VC_IncludePath);$(ProjectDir);$(IncludePath)</IncludePath>
+    <IncludePath>E:\development\yepyep6969\nexus\shared;$(VC_IncludePath);$(ProjectDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(DDK_LibraryPath_DDKPlatform);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
@@ -150,13 +150,17 @@
     <ClInclude Include="dependencies\crt\new.h" />
     <ClInclude Include="dependencies\crt\Ntddk.hpp" />
     <ClInclude Include="dependencies\crt\stlcrt.h" />
-    <ClInclude Include="src\defines.h" />
+    <ClInclude Include="src\definitions.h" />
     <ClInclude Include="src\includes.h" />
+    <ClInclude Include="src\structs.h" />
     <ClInclude Include="src\utilities\crypt.h" />
     <ClInclude Include="src\utilities\memory.h" />
     <ClInclude Include="src\utilities\stl.h" />
     <ClInclude Include="src\utilities\raii.h" />
     <ClInclude Include="src\utilities\util.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="src\utilities\spoof_call.asm" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

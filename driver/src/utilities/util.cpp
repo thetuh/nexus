@@ -1,5 +1,16 @@
 #include "../includes.h"
 
+bool util::safe_copy( void* dst, void* src, SIZE_T size )
+{
+    SIZE_T bytes = 0;
+    const auto current_process = IoGetCurrentProcess( );
+
+    if ( MmCopyVirtualMemory( current_process, src, current_process, dst, size, KernelMode, &bytes ) == STATUS_SUCCESS && bytes == size )
+        return true;
+
+    return false;
+}
+
 void* util::get_system_information( SYSTEM_INFORMATION_CLASS information_class )
 {
     unsigned long size = 0;

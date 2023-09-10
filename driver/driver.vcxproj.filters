@@ -48,7 +48,7 @@
     <ClInclude Include="src\includes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\defines.h">
+    <ClInclude Include="src\definitions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="dependencies\crt\c_alloc.h">
@@ -84,5 +84,13 @@
     <ClInclude Include="src\utilities\crypt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\structs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="src\utilities\spoof_call.asm">
+      <Filter>Source Files</Filter>
+    </MASM>
   </ItemGroup>
 </Project>
